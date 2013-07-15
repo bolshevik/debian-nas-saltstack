@@ -1,0 +1,83 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          tgtd
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts the tgtd iscsi target server
+# Description:       starts tgtd
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/tgtd
+NAME=tgtd
+DESC=tgtd
+
+# Include tgtd defaults if available
+TGTD_ENABLE=false
+if [ -f /etc/default/tgtd ]; then
+   . /etc/default/tgtd
+fi
+
+test -x $DAEMON || exit 0
+
+set -e
+
+. /lib/lsb/init-functions
+
+case "$1" in
+	start)
+            if [ "$TGTD_ENABLE" = "true" ]; then
+		echo -n "Starting $DESC: "
+		$DAEMON $DAEMON_OPTS || true
+                tgt-admin -e
+		echo "$NAME."
+            else
+                echo "$DESC is disabled."
+            fi
+            ;;
+
+	stop)
+	   echo -n "Stopping $DESC: "
+           killall -9 $DAEMON || true
+	   echo "$NAME."
+	   ;;
+
+	restart|force-reload)
+	   echo -n "Restarting $DESC: "
+           killall -9 $DAEMON || true
+           if [ "$TGTD_ENABLE" = "true" ]; then
+		sleep 1
+                $DAEMON $DAEMON_OPTS || true
+                tgt-admin -e
+                echo "$NAME."
+           else
+                echo "$DESC is disabled."
+           fi
+	   ;;
+
+	reload)
+           echo -n "Reloading configuration for $DESC: "
+	   tgt-admin -e
+           echo "$NAME."
+	   ;;
+
+	status)
+           if [ `pidof tgtd|grep "$pid"|wc -l` -ne 0 ] ; then
+                echo "$NAME is currently running."
+                exit 0
+            else
+                echo "ProFTPD is currently not running."
+                exit 3
+            fi
+           ;;
+
+	*)
+	   echo "Usage: $NAME {start|stop|restart|reload|force-reload|status|configtest}" >&2
+	   exit 1
+	   ;;
+esac
+
+exit 0

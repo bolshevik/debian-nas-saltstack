@@ -1,0 +1,3 @@
+# Pass all events to our one handler script
+event=button/power
+action=/etc/acpi/powerbtn.sh %e

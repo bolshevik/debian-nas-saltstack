@@ -1,0 +1,2 @@
+general:
+  timezone: Europe/Kiev

@@ -1,0 +1,37 @@
+# Generated with Salt.
+log_format  main  '$remote_addr - $remote_user [$time_local] "$request "'
+                  '$status $body_bytes_sent "$http_referer" '
+                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+server {
+  listen   80; ## listen for ipv4; this line is default and implied
+  #listen   [::]:80 default ipv6only=on; ## listen for ipv6
+
+  access_log  /var/log/nginx/access.log  main;
+
+  charset utf-8;
+  include /etc/nginx/sites-available/locations/*;
+
+  location ~ /\.ht {
+    deny  all;
+  }
+}
+
+server {
+  listen   443; ## listen for ipv4; this line is default and implied
+  #listen   [::]:443 default ipv6only=on; ## listen for ipv6
+
+  ssl on;
+  ssl_certificate /etc/nginx/keys/server.crt;
+  ssl_certificate_key /etc/nginx/keys/server.key;
+
+  access_log  /var/log/nginx/access_ssl.log  main;
+
+  charset utf-8;
+  include /etc/nginx/sites-available/locations/*;
+
+  location ~ /\.ht {
+    deny  all;
+  }
+}
+
