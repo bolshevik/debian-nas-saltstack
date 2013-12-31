@@ -34,25 +34,18 @@ tgtd:
       - file: /etc/init.d/tgtd
       - pkg: tgt
 
+/tmp/tgtd_configurator.sh:
+  file.managed:
+    - source: salt://iscsi/tgtd_configurator.sh.tpl
+    - user: root
+    - group: root
+    - mode: 700
+    - template: jinja
+    - require:
+      - service: tgtd    
+
 configure_tgtd:
   cmd.run:
     - require:
-      - service: tgtd
-    - name: tgt-admin --delete ALL &&
-{%- for device, parameters in pillar.get('iscsi', {})['devices'].items() -%}
-    {%- set tid = loop.index -%}
-      tgtadm --lld iscsi --op new --mode target --tid {{ tid }} -T {{ pillar.get('iscsi', {})['target_prefix'] }}:{{ device }} && 
-    {%- for user, password in (parameters['incoming'] or {}).items() -%}
-      tgtadm --lld iscsi --mode account --op new --user {{ user }} --password {{ password }} && 
-      tgtadm --lld iscsi --mode account --op bind --tid {{ tid }} --user {{ user }} && 
-    {%- endfor -%}
-    {%- for user, password in (parameters['outgoing'] or {}).items() -%}
-      tgtadm --lld iscsi --mode account --op new --user {{ user }} --password {{ password }} && 
-      tgtadm --lld iscsi --mode account --op bind --tid {{ tid }} --user {{ user }} --outgoing && 
-    {%- endfor -%}
-    {%- for path, options in parameters['paths'].items() -%}
-      touch -a {{ path }} && tgtadm --lld iscsi --mode logicalunit --op new --tid {{ tid }} --lun {{ loop.index }} -b {{ path }} &&
-    {%- endfor -%}
-      tgtadm --lld iscsi --op bind --mode target --tid {{ tid }} -I ALL &&
-{%- endfor -%}
-      tgt-admin --dump > /etc/tgt/targets.conf
+      - file: /tmp/tgtd_configurator.sh
+    - name: /tmp/tgtd_configurator.sh && tgt-admin --dump > /etc/tgt/targets.conf && rm /tmp/tgtd_configurator.sh

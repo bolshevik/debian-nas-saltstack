@@ -3,6 +3,13 @@ location  /ajaxplorer/  {
   index index.php;
   charset utf-8;
 
+  location = /ajaxplorer/conf/       { deny all; }
+  location = /ajaxplorer/data/       { deny all; }
+  location = /ajaxplorer/robots.txt  { access_log off; log_not_found off; }
+  location = /ajaxplorer/favicon.ico { access_log off; log_not_found off; }
+  location ~ /ajaxplorer/\.          { access_log off; log_not_found off; deny all; }
+  location ~ /ajaxplorer/~$           { access_log off; log_not_found off; deny all; }
+
   location /ajaxplorer/shares {
     try_files $uri $uri/ /dav.php?$args;
   }

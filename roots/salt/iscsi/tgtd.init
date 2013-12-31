@@ -4,8 +4,8 @@
 # Provides:          tgtd
 # Required-Start:    $local_fs $remote_fs $network $syslog
 # Required-Stop:     $local_fs $remote_fs $network $syslog
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
 # Short-Description: starts the tgtd iscsi target server
 # Description:       starts tgtd
 ### END INIT INFO
@@ -32,6 +32,9 @@ case "$1" in
             if [ "$TGTD_ENABLE" = "true" ]; then
 		echo -n "Starting $DESC: "
 		$DAEMON $DAEMON_OPTS || true
+                # We need this to bind only IPv4 addresses for now.
+                tgtadm --lld iscsi --op delete --mode portal --param portal="[::]:3260,1"
+
                 tgt-admin -e
 		echo "$NAME."
             else
@@ -51,6 +54,8 @@ case "$1" in
            if [ "$TGTD_ENABLE" = "true" ]; then
 		sleep 1
                 $DAEMON $DAEMON_OPTS || true
+                # We need this to bind only IPv4 addresses for now.
+                tgtadm --lld iscsi --op delete --mode portal --param portal="[::]:3260,1"
                 tgt-admin -e
                 echo "$NAME."
            else
@@ -69,7 +74,7 @@ case "$1" in
                 echo "$NAME is currently running."
                 exit 0
             else
-                echo "ProFTPD is currently not running."
+                echo "TGTD is currently not running."
                 exit 3
             fi
            ;;

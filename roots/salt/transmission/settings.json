@@ -20,7 +20,7 @@
     "encryption": 0, 
     "idle-seeding-limit": 30, 
     "idle-seeding-limit-enabled": false, 
-    "incomplete-dir": "/home/debian-transmission/incomplete", 
+    "incomplete-dir": "/var/debian-transmission/incomplete", 
     "incomplete-dir-enabled": false, 
     "lpd-enabled": true, 
     "max-peers-global": 200, 
