@@ -14,7 +14,7 @@ secure_webhome_{{user}}:
     - file_mode: 644
     - create: False
     - require:
-      - cmd.run: secure_webhome_{{user}}
+      - cmd: secure_webhome_{{user}}
     - require_in:
       - file: /etc/nginx/sites-available/default
 {%- endif %}
