@@ -42,6 +42,8 @@ nginx_share_up_{{user}}:
     - require:
       - user: {{user}}
       - pkg: nginx
+    - watch_in:
+      - service: nginx
 {%- endmacro %}
 
 {% macro share_down(user) -%}
@@ -56,11 +58,16 @@ nginx_share_down_{{user}}:
 
 remove_www_data_from_{{user}}_group:
   cmd.run:
-    - name: gpasswd -d www-data {{user}}
+    - name: gpasswd -d www-data {{user}} || true
     - require:
       - user: {{user}}
       - pkg: nginx
+    - watch_in:
+      - service: nginx
 
 /etc/nginx/sites-available/locations/{{user}}:
-  file.absent
+  file:
+    - absent
+    - watch_in:
+      - service: nginx
 {%- endmacro %}

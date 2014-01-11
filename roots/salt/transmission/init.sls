@@ -71,7 +71,7 @@ transmission_add_to_group_{{user}}:
 {% else %}
 transmission_remove_from_group_{{user}}:
   cmd.run:
-    - name: gpasswd -d debian-transmission {{user}}
+    - name: gpasswd -d debian-transmission {{user}} || true
     - require:
       - user: {{user}}
       - pkg: transmission-daemon

@@ -19,7 +19,7 @@ add_minidlna_to_{{user}}_group:
 {% else %}
 remove_minidlna_from_{{user}}_group:
   cmd.run:
-    - name: gpasswd -d minidlna {{user}}
+    - name: gpasswd -d minidlna {{user}} || true
     - require:
       - user: {{user}}
       - pkg: minidlna

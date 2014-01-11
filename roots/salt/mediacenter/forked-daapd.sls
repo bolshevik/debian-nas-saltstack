@@ -25,7 +25,7 @@ add_daapd_to_{{user}}_group:
 {% else %}
 remove_daapd_from_{{user}}_group:
   cmd.run:
-    - name: gpasswd -d daapd {{user}}
+    - name: gpasswd -d daapd {{user}} || true
     - require:
       - user: {{user}}
       - pkg: forked-daapd
