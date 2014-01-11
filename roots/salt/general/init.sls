@@ -6,7 +6,6 @@ general:
       - git-core
       - mc
       - vim
-      - rsync
       - zsh
       - wireless-tools
       - wpasupplicant

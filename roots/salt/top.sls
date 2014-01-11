@@ -15,3 +15,4 @@ base:
     - pxe
     - backups
     - iscsi
+    - rsync

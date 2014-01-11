@@ -1,9 +1,9 @@
 users:
   delete_users:
-    - test 
+    - test
   add_users:
-    bolshevik:
-      home: /home/bolshevik
+    someuser:
+      home: /home/someuser
       password: test
       publickey: salt://../pillar/users/somekey.pub
       shell: /bin/sh
@@ -15,6 +15,9 @@ users:
       mediashare: False
       avscan: True
       backups: True
+      rsync:
+        enabled: False
+        auth:
     public:
       home: /home/public
       password:
@@ -28,3 +31,7 @@ users:
       mediashare: True
       avscan: True
       backups: True
+      rsync: 
+        enabled: True
+        auth:
+          public: publictest

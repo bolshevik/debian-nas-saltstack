@@ -33,7 +33,7 @@ acpid:
     - source: salt://acpid/acpi/powerbtn.sh
     - template: jinja
     - require:
-      - pkg: samba
+      - pkg: acpid
       - file: /etc/acpi
 
 /etc/acpi/events/powerbtn:
@@ -44,6 +44,6 @@ acpid:
     - source: salt://acpid/acpi/events/powerbtn
     - template: jinja
     - require:
-      - pkg: samba
+      - pkg: acpid
       - file: /etc/acpi/events
 
