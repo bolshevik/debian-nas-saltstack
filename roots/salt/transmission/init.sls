@@ -12,6 +12,8 @@ stop_transmission:
   service.dead:
     - name: transmission-daemon
     - sig: transmission-daemon
+    - prereq:
+      - file: /var/lib/transmission-daemon/info/settings.json
 
 transmission-cli:
   pkg:
@@ -47,7 +49,6 @@ transmission-cli:
       - pkg: transmission-daemon
       - file: /var/debian-transmission/downloads
       - file: /var/debian-transmission/incomplete
-      - service: stop_transmission
 {% endif %}
 
 {% for user, parameters in pillar.get('users', {})['add_users'].items() -%}
