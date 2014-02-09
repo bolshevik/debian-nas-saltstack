@@ -28,6 +28,7 @@ remove_minidlna_from_{{user}}_group:
 
 /etc/minidlna.conf:
   file.managed:
+    - mode: 0644
     - source: salt://mediacenter/minidlna.conf
     - template: jinja
     - require:

@@ -8,6 +8,7 @@ users:
       publickey: salt://../pillar/users/somekey.pub
       shell: /bin/sh
       samba: True
+      samba_guest_readonly: False
       web: True  
       ftp: True
       sudo: True
@@ -24,6 +25,7 @@ users:
       publickey:
       shell: /bin/false
       samba: True
+      samba_guest_readonly: True
       web: True
       ftp: True
       sudo: False

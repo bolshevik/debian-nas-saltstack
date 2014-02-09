@@ -18,6 +18,11 @@ include:
 {% if parameters['samba'] %}
    {% if parameters['password'] %}
       - echo -e "{{parameters['password']}}\n{{parameters['password']}}\n" | smbpasswd -La -s {{user}}
+   {% if parameters['samba_guest_readonly'] %}
+      - usermod -a -G {{user}} {{ pillar.get('samba', {})['guest_username'] }}
+   {% else %}
+      - gpasswd -d {{ pillar.get('samba', {})['guest_username'] }} {{user}} || true
+   {% endif %}
    {% else %}
       - smbpasswd -Lan {{user}}
       - usermod -a -G {{user}} {{ pillar.get('samba', {})['guest_username'] }}
