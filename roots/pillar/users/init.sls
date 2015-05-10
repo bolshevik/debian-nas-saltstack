@@ -5,11 +5,11 @@ users:
     someuser:
       home: /home/someuser
       password: test
-      publickey: salt://../pillar/users/somekey.pub
+      publickey: ssh-rsa AABCD...The key goes here.
       shell: /bin/sh
       samba: True
       samba_guest_readonly: False
-      web: True  
+      web: True
       ftp: True
       sudo: True
       torrents: False

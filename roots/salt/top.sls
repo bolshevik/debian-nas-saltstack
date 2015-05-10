@@ -2,7 +2,7 @@ base:
   '*':
     - general
     - usbautomount
-    - acpid
+#    - acpid
     - logrotate
     - users
     - web.shares

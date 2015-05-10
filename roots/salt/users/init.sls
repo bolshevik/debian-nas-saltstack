@@ -16,10 +16,9 @@
     - require:
       - pkg: general
   {% if parameters['publickey'] %}
-  ssh_auth:
-    - present
+  ssh_auth.present:
     - user: {{user}}
-    - source: {{parameters['publickey']}}
+    - name: {{parameters['publickey']}}
     - require:
       - user: {{user}}
   {% endif %}

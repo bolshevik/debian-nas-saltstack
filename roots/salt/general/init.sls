@@ -7,8 +7,6 @@ general:
       - mc
       - vim
       - zsh
-      - wireless-tools
-      - wpasupplicant
       - openssh-server
       - openssh-client
       - adduser

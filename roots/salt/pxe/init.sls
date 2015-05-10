@@ -28,7 +28,7 @@ dnsmasq:
 
 /etc/dnsmasq.conf:
   file.append:
-    - text: conf-dir=/etc/dnsmasq.d
+    - text: conf-dir=/etc/dnsmasq.d,.bak
     - watch_in:
       - service: dnsmasq
     - require:

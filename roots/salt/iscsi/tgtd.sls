@@ -1,10 +1,14 @@
 tgt:
   pkg:
     - installed
+  service.running:
+    - require:
+      - file: /etc/init.d/tgt
+      - pkg: tgt
 
-/etc/init.d/tgtd:
+/etc/init.d/tgt:
   file.managed:
-    - source: salt://iscsi/tgtd.init
+    - source: salt://iscsi/tgt.init
     - user: root
     - group: root
     - mode: 755
@@ -13,10 +17,10 @@ tgt:
       - pkg: tgt
       - file: /etc/default/tgtd
 
-update-rc.d tgtd defaults:
+update-rc.d tgt defaults:
   cmd.run:
     - require:
-      - file: /etc/init.d/tgtd
+      - file: /etc/init.d/tgt
 
 /etc/default/tgtd:
   file.managed:
@@ -28,12 +32,6 @@ update-rc.d tgtd defaults:
     - require:
       - pkg: tgt
 
-tgtd:
-  service.running:
-    - require:
-      - file: /etc/init.d/tgtd
-      - pkg: tgt
-
 /tmp/tgtd_configurator.sh:
   file.managed:
     - source: salt://iscsi/tgtd_configurator.sh.tpl
@@ -42,10 +40,10 @@ tgtd:
     - mode: 700
     - template: jinja
     - require:
-      - service: tgtd    
+      - service: tgt
 
 configure_tgtd:
   cmd.run:
     - require:
       - file: /tmp/tgtd_configurator.sh
-    - name: /tmp/tgtd_configurator.sh && tgt-admin --dump > /etc/tgt/targets.conf && rm /tmp/tgtd_configurator.sh
+    - name: /tmp/tgtd_configurator.sh && tgt-admin --dump > /etc/tgt/conf.d/iscsi.conf && rm /tmp/tgtd_configurator.sh

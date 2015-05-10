@@ -1,0 +1,132 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          tgtd tgt
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      zfs
+# Should-Stop:       zfs
+# Default-Start:     3 4 5
+# Default-Stop:      0 1 2 6
+# Short-Description: iscsi target daemon
+# Description:       iscsi target daemon
+### END INIT INFO
+
+DESC="target framework daemon"
+NAME=tgtd
+DAEMON=/usr/sbin/${NAME}
+PIDFILE=/run/${NAME}.pid
+
+TGTD_CONFIG=/etc/tgt/targets.conf
+
+. /lib/lsb/init-functions
+
+[ -x $DAEMON ] || exit 0
+
+start()
+{
+	log_daemon_msg "Starting $DESC" "$NAME"
+	# Start tgtd first.
+	if ! start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE \
+		--make-pidfile --background --exec $DAEMON -- -f; then
+		log_end_msg 1
+		exit 1
+	fi
+
+	log_end_msg 0
+	# Put tgtd into "offline" state until all the targets are configured.
+	# We don't want initiators to (re)connect and fail the connection
+	# if it's not ready.
+	tgtadm --op update --mode sys --name State -v offline
+	# Configure the targets.
+	tgt-admin -e -c $TGTD_CONFIG
+	# Put tgtd into "ready" state.
+	tgtadm --op update --mode sys --name State -v ready
+}
+
+stop()
+{
+	# NOTE: Forced shutdown of the iscsi target may cause data corruption
+	# for initiators that are connected.
+	log_daemon_msg "Force-stopping $DESC" "$NAME"
+	# Offline everything first. May be needed if we're rebooting, but
+	# expect the initiators to reconnect cleanly when we boot again
+	# (i.e. we don't want them to reconnect to a tgtd which is still
+	# working, but the target is gone).
+	tgtadm --op update --mode sys --name State -v offline >/dev/null 2>&1
+	RETVAL=$?
+	if [ "$RETVAL" -eq 107 ] ; then
+	    # tgtd not running
+	    log_end_msg 0
+	else
+	    tgt-admin --offline ALL
+	    # Remove all targets, even if they are still in use.
+	    tgt-admin --update ALL -c /dev/null -f
+	    # It will shut down tgtd only after all targets were removed.
+	    tgtadm --op delete --mode system
+	    RETVAL=$?
+	    if [ "$RETVAL" -ne 0 ] ; then
+		log_end_msg 1
+		echo "Failed to shutdown tgtd"
+		exit 1
+	    fi
+	    log_end_msg 0
+	    rm -f $PIDFILE
+	fi
+}
+
+reload()
+{
+	log_daemon_msg "Reloading configuration of $DESC" "$NAME"
+	# Update configuration for targets. Only targets which
+	# are not in use will be updated.
+	tgt-admin --update ALL -c $TGTD_CONFIG >/dev/null 2>&1
+	RETVAL=$?
+	if [ "$RETVAL" -eq 107 ] ; then
+		log_end_msg 1
+		echo "tgtd is not running"
+		exit 1
+	fi
+	log_end_msg 0
+}
+
+forcedreload()
+{
+	log_daemon_msg "Forced-reload configuration of $DESC" "$NAME"
+	# Update configuration for targets, even those in use.
+	tgt-admin --update ALL -f -c $TGTD_CONFIG >/dev/null 2>&1
+	RETVAL=$?
+	if [ "$RETVAL" -eq 107 ] ; then
+		log_end_msg 1
+		echo "tgtd is not running"
+		exit 1
+	else
+		log_end_msg 0
+	fi
+}
+
+case $1 in
+	start)
+		start
+		;;
+	stop|forcedstop)
+		stop
+		;;
+	restart|forcedrestart)
+		stop && start
+		;;
+	reload)
+		reload
+		;;
+	force-reload)
+		forcedreload
+		;;
+	status)
+		status_of_proc -p $PIDFILE /usr/sbin/tgtd tgtd
+		exit $?
+		;;
+	*)
+		echo "Usage: $0 {start|stop|forcedstop|restart|forcedrestart|reload|force-reload|status}"
+		exit 2
+		;;
+esac
+
